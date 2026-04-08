@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.testmapapp.R
 import com.example.testmapapp.domain.CarInformation
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -20,20 +20,20 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
-import kotlin.random.Random
 
 class MapFragment : Fragment() {
 
     private val args: MapFragmentArgs by navArgs()
-    private lateinit var mapView: MapView
 
+    private lateinit var mapView: MapView
     private var mapLibreMap: MapLibreMap? = null
     private var carMarker: Marker? = null
-    private var carPositionJob: Job? = null
+
+    private val viewModel: MapViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         MapLibre.getInstance(requireContext())
         val view = inflater.inflate(R.layout.fragment_map, container, false)
@@ -45,50 +45,39 @@ class MapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val carInformation: CarInformation = args.args
 
+        viewModel.start(carInformation)
+
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             mapLibreMap = map
-
             map.setStyle("https://maps.starline.ru/mapstyles/default/style.json") { _ ->
-                val carLatLng = carInformation.lat
-                map.cameraPosition = CameraPosition.Builder()
-                    .target(carLatLng)
-                    .zoom(15.0)
-                    .build()
-
-                carMarker = map.addMarker(
-                    MarkerOptions()
-                        .position(carLatLng)
-                        .title("Car")
-                )
-
-                startCarLocationUpdates()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.carPosition
+                        .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                        .collect { latLng ->
+                            if (latLng != null) {
+                                updateCarMarker(latLng)
+                            }
+                        }
+                }
             }
         }
     }
 
-    private fun startCarLocationUpdates() {
-        carPositionJob?.cancel()
-        carPositionJob = viewLifecycleOwner.lifecycleScope.launch {
-            while (isActive) {
-                delay(1000)
-                val map = mapLibreMap ?: continue
-                val car = carMarker ?: continue
-
-                // Случайный сдвиг примерно на 100м
-                val latOffset = Random.nextDouble(-0.0008, 0.0008)
-                val lonOffset = Random.nextDouble(-0.0008, 0.0008)
-
-                val currentPosition = car.position
-                val newPosition = LatLng(
-                    currentPosition.latitude + latOffset,
-                    currentPosition.longitude + lonOffset
-                )
-
-                map.run {
-                    car.position = newPosition
-                }
-            }
+    private fun updateCarMarker(latLng: LatLng) {
+        val map = mapLibreMap ?: return
+        if (carMarker == null) {
+            carMarker = map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title("Car")
+            )
+            map.cameraPosition = CameraPosition.Builder()
+                .target(latLng)
+                .zoom(15.0)
+                .build()
+        } else {
+            carMarker?.position = latLng
         }
     }
 
@@ -118,8 +107,6 @@ class MapFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        carPositionJob?.cancel()
-        carPositionJob = null
         mapLibreMap?.let { map ->
             carMarker?.let { map.removeMarker(it) }
         }
