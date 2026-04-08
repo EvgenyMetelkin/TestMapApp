@@ -5,14 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.example.testmapapp.R
 import com.example.testmapapp.domain.CarInformation
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 
 class MapFragment : Fragment() {
+
+    private val args: MapFragmentArgs by navArgs()
 
     private lateinit var mapView: MapView
 
@@ -29,18 +31,16 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val carInformation = arguments?.getParcelable<CarInformation>("args")
-        val latitude = carInformation?.lat ?: LatLng(0.0, 0.0)
+        val carInformation: CarInformation = args.args
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             map.setStyle("https://maps.starline.ru/mapstyles/default/style.json")
             map.cameraPosition = CameraPosition.Builder()
-                .target(latitude)
+                .target(carInformation.lat)
                 .zoom(1.0)
                 .build()
         }
-
     }
 
     override fun onStart() {

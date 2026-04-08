@@ -8,10 +8,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.fragment.findNavController
 import com.example.testmapapp.databinding.FragmentCarListBinding
 import com.example.testmapapp.ui.list.adapter.CarListAdapter
 import com.example.testmapapp.data.CarRepository
+import com.example.testmapapp.domain.CarInformation
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class CarListFragment : Fragment() {
         )
     }
 
-    private val adapter = CarListAdapter()
+    private lateinit var adapter: CarListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -37,7 +38,12 @@ class CarListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = CarListAdapter { carInformation: CarInformation ->
+            val action = CarListFragmentDirections.toMapFragment(carInformation)
+            findNavController().navigate(action)
+        }
+
+        binding.recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {

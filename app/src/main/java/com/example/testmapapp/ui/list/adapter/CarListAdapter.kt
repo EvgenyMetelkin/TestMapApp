@@ -11,7 +11,9 @@ import com.example.testmapapp.R
 import com.example.testmapapp.domain.CarGroup
 import com.example.testmapapp.domain.CarInformation
 
-class CarListAdapter : ListAdapter<CarGroup, RecyclerView.ViewHolder>(DiffCallback) {
+class CarListAdapter(
+    private val onCarClick: (CarInformation) -> Unit = {}
+) : ListAdapter<CarGroup, RecyclerView.ViewHolder>(DiffCallback) {
 
     companion object {
         private const val VIEW_TYPE_GROUP = 0
@@ -44,7 +46,7 @@ class CarListAdapter : ListAdapter<CarGroup, RecyclerView.ViewHolder>(DiffCallba
                 val view = LayoutInflater.from(parent.context).inflate(
                     R.layout.item_car_info, parent, false
                 )
-                CarViewHolder(view)
+                CarViewHolder(view, onCarClick)
             }
         }
     }
@@ -63,9 +65,21 @@ class CarListAdapter : ListAdapter<CarGroup, RecyclerView.ViewHolder>(DiffCallba
         }
     }
 
-    class CarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class CarViewHolder(
+        itemView: View,
+        private val onClick: (CarInformation) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
         private val carTitleView: TextView = itemView.findViewById(R.id.carTitle)
+        private var currentCar: CarInformation? = null
+
+        init {
+            itemView.setOnClickListener {
+                currentCar?.let { car -> onClick(car) }
+            }
+        }
+
         fun bind(car: CarInformation) {
+            currentCar = car
             carTitleView.text = car.title
         }
     }
