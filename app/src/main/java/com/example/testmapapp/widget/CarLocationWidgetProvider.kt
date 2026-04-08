@@ -1,17 +1,15 @@
 package com.example.testmapapp.widget
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.widget.RemoteViews
 import com.example.testmapapp.R
 import com.example.testmapapp.ui.map.MapViewModel
+import java.io.File
 import java.lang.Double
 import kotlin.IntArray
-import kotlin.intArrayOf
 
 class CarLocationWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(
@@ -39,7 +37,7 @@ class CarLocationWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetIds: IntArray
         ) {
-            val prefs: SharedPreferences = context.getSharedPreferences(
+            val prefs = context.getSharedPreferences(
                 MapViewModel.PREF_NAME,
                 Context.MODE_PRIVATE
             )
@@ -55,17 +53,21 @@ class CarLocationWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.text_latitude, latStr)
                 views.setTextViewText(R.id.text_longitude, lonStr)
 
-                val intent = Intent(context, CarLocationWidgetProvider::class.java)
-                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    appWidgetId,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                views.setOnClickPendingIntent(R.id.text_latitude, pendingIntent)
-                views.setOnClickPendingIntent(R.id.text_longitude, pendingIntent)
+                val imagePath = prefs.getString(MapViewModel.KEY_WIDGET_MAP_PATH, null)
+                if (imagePath != null) {
+                    val file = File(imagePath)
+                    if (file.exists()) {
+                        val bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                        views.setImageViewBitmap(R.id.widget_map_image, bitmap)
+                    } else {
+                        views.setImageViewResource(
+                            R.id.widget_map_image,
+                            android.R.color.darker_gray
+                        )
+                    }
+                } else {
+                    views.setImageViewResource(R.id.widget_map_image, android.R.color.darker_gray)
+                }
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

@@ -14,12 +14,12 @@ import com.example.testmapapp.R
 import com.example.testmapapp.domain.CarInformation
 import kotlinx.coroutines.launch
 import org.maplibre.android.MapLibre
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 
 class MapFragment : Fragment() {
 
@@ -50,7 +50,7 @@ class MapFragment : Fragment() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             mapLibreMap = map
-            map.setStyle("https://maps.starline.ru/mapstyles/default/style.json") { _ ->
+            map.setStyle(MAP_STYLE) { _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
                     viewModel.carPosition
                         .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -119,5 +119,9 @@ class MapFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        const val MAP_STYLE = "https://maps.starline.ru/mapstyles/default/style.json"
     }
 }
