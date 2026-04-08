@@ -1,0 +1,51 @@
+{
+  "cars": {
+    "list": [
+      {
+        "parent": "root",
+        "group": "private",
+        "title": "Личные авто"
+      },
+      {
+        "parent": "private",
+        "type": "S96v2",
+        "title": "Geely Beeley",
+        "lat": 59.944265,
+        "lon": 30.307159
+      },
+      {
+        "parent": "root",
+        "group": "shared",
+        "title": "Общие авто"
+      },
+      {
+        "parent": "shared",
+        "type": "E97",
+        "title": "VW Petersborg",
+        "lat": 59.941842,
+        "lon": 30.608865
+      },
+      {
+        "parent": "private",
+        "type": "A93",
+        "title": "Kia Kousikay",
+        "lat": 49.869913,
+        "lon": 142.788620
+      },
+      {
+        "parent": "shared",
+        "type": "M23",
+        "title": "Tesla Model 0",
+        "lat": 37.418964,
+        "lon": -122.089884
+      },
+      {
+        "parent": "shared",
+        "type": "M17",
+        "title": "Электровеник",
+        "lat": 60.025627,
+        "lon": 30.332308
+      }
+    ]
+  }
+}

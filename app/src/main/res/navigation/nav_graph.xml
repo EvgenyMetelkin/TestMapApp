@@ -2,11 +2,33 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/mapFragment">
+    app:startDestination="@id/carListFragment">
+
+    <fragment
+        android:id="@+id/carListFragment"
+        android:name="com.example.testmapapp.ui.list.CarListFragment"
+        android:label="CarListFragment"
+        tools:layout="@layout/fragment_car_list">
+
+        <action
+            android:id="@+id/toMapFragment"
+            app:destination="@id/mapFragment"
+            app:launchSingleTop="true">
+
+            <argument
+                android:name="args"
+                app:argType="com.example.testmapapp.domain.CarInformation" />
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.testmapapp.map.MapFragment"
-        android:label="fragment_map"
-        tools:layout="@layout/fragment_map" />
+        android:name="com.example.testmapapp.ui.map.MapFragment"
+        android:label="MapFragment"
+        tools:layout="@layout/fragment_map">
+
+        <argument
+            android:name="args"
+            app:argType="com.example.testmapapp.domain.CarInformation" />
+    </fragment>
 </navigation>
